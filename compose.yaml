@@ -3,7 +3,12 @@ services:
     build:
       dockerfile: containers/mongo.dockerfile
     ports:
-      - "21017:21017"
+      - "27017:27017"
+    # env file contains: mongo username and password
+    env_file:
+      - "containers/mongo.env"
+    volumes:
+      - mongo-data:/data/db
   
   app:
     build: 
@@ -11,5 +16,9 @@ services:
       dockerfile: containers/app.dockerfile
     ports:
       - "3000:3000"
+    # env file contains: MONGODB_URI
     env_file:
       - "containers/app.env"
+  
+volumes:
+  mongo-data:
