@@ -1,0 +1,10 @@
+services:
+  mongo:
+    build: ./dockerfiles/Mongo.dockerfile
+    ports:
+      - "21017:21017"
+  
+  app:
+    build: ./dockerfiles/app.dockerfile
+    ports:
+      - "3000:3000"
