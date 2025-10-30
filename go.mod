@@ -1,4 +1,4 @@
-module mongo_play
+module mongo_vector_search
 
 go 1.25.1
 

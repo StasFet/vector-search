@@ -1,10 +1,15 @@
 services:
   mongo:
-    build: ./dockerfiles/Mongo.dockerfile
+    build:
+      dockerfile: containers/mongo.dockerfile
     ports:
       - "21017:21017"
   
   app:
-    build: ./dockerfiles/app.dockerfile
+    build: 
+      context: .
+      dockerfile: containers/app.dockerfile
     ports:
       - "3000:3000"
+    env_file:
+      - "containers/app.env"
