@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	i "mongo_vector_search/internal"
 
-	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
@@ -39,4 +40,13 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("The deployment has been successfully pinged! The connection is made.")
+
+	// temporary test
+	testString := "Hello World!"
+	embedding, err := i.GetVectorEmbedding(testString)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Len of embedding of '%s' : %v\n", testString, len(*embedding.GetVector()))
+
 }
