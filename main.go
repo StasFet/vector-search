@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	i "mongo_vector_search/internal"
+	"os"
+	"unicode/utf8"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -15,7 +17,6 @@ func main() {
 		log.Fatalf("error loading env: %v", err)
 	}
 
-	// fmt.Println("Hello World!")
 	client, err := i.ConnectToMongo()
 	if err != nil {
 		log.Fatalf("error connecting to mongo: %v", err)
@@ -32,24 +33,20 @@ func main() {
 	if ping := i.PingDB(client); !ping {
 		log.Fatalf("error: cannot ping db")
 	}
-	collection := client.Database("vector_db_1").Collection("coll")
 
-	allDocs, err := i.GetAllDocuments(context.TODO(), *collection)
-	if err != nil {
-		log.Fatalf("error getting all documents: %v", err)
+	// create API endpoints
+	ginClient := gin.Default()
+
+	apiGroup := ginClient.Group("/api/")
+	{
+		apiGroup.GET("/vectorstore/", i.HandleGetAll(client))
+		apiGroup.POST("/vectorestore/", i.HandleInsert(client))
+		apiGroup.POST("/vectorsearch/", i.HandleSearch(client))
 	}
 
-	fmt.Println("All entries:")
-	for _, doc := range *allDocs {
-		fmt.Printf("\t %s\n", doc.Text)
+	port := os.Getenv("PORT")
+	if utf8.RuneCountInString(port) == 0 {
+		port = "3000"
 	}
-
-	searchString := "Stool"
-
-	closest, err := i.VectorSearch(context.TODO(), searchString, *collection)
-	if err != nil {
-		log.Fatalf("error conducting vector search: %v", err)
-	}
-
-	fmt.Printf("Closest text to \"%s\": \n%s\n", searchString, closest)
+	ginClient.Run(":" + port)
 }

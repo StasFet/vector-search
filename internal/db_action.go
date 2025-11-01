@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"math"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -45,6 +46,7 @@ func CreateVectorSearchIndex(ctx context.Context, coll *mongo.Collection) error 
 	return nil
 }
 
+// Inserts a document to a collection
 func InsertDocument(ctx context.Context, coll *mongo.Collection, document any) (*mongo.InsertOneResult, error) {
 	result, err := coll.InsertOne(ctx, document)
 	if err != nil {
@@ -67,10 +69,10 @@ func GetAllDocuments(ctx context.Context, coll mongo.Collection) (*[]VectorDocum
 	return &searchResults, nil
 }
 
-func VectorSearch(ctx context.Context, text string, coll mongo.Collection) (string, error) {
+func VectorSearch(ctx context.Context, text string, limit int, coll mongo.Collection) ([]string, error) {
 	embedRes, err := GetVectorEmbedding(text)
 	if err != nil {
-		return "N/A", err
+		return nil, err
 	}
 
 	queryVector := BSONBinVector(embedRes.GetVector())
@@ -81,7 +83,7 @@ func VectorSearch(ctx context.Context, text string, coll mongo.Collection) (stri
 			{"path", "embedding"},
 			{"queryVector", queryVector},
 			{"numCandidates", 150},
-			{"limit", 1},
+			{"limit", limit},
 		}},
 	}
 
@@ -96,13 +98,18 @@ func VectorSearch(ctx context.Context, text string, coll mongo.Collection) (stri
 
 	cursor, err := coll.Aggregate(ctx, mongo.Pipeline{vectorSearchStage, projectStage})
 	if err != nil {
-		return "N/A", err
+		return nil, err
 	}
 
 	var results []VectorDocumentV1
 	if err = cursor.All(ctx, &results); err != nil {
-		return "N/A", err
+		return nil, err
 	}
 
-	return string(results[0].Text), nil
+	matchStrings := []string{}
+
+	for i := float64(0); i < math.Min(float64(len(results)), float64(limit)); i++ {
+		matchStrings = append(matchStrings, results[int(i)].Text)
+	}
+	return matchStrings, nil
 }

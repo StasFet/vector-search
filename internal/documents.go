@@ -10,6 +10,7 @@ type VectorDocumentV1 struct {
 	EmbeddingV1 []float32 `bson:"embedding"`
 }
 
+// creates a full VectorDocumentV1 using `text`
 func NewVectorDocumentV1(text string) (*VectorDocumentV1, error) {
 	newVec := VectorDocumentV1{}
 	newVec.Text = text

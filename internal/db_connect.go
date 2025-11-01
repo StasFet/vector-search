@@ -10,6 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+const (
+	DatabaseName = "vector_db_1"
+	CollectionName = "coll"
+)
+
 func ConnectToMongo() (*mongo.Client, error) {
 	var uri string
 	if uri = os.Getenv("MONGODB_URI"); uri == "" {
