@@ -24,12 +24,6 @@ func ConnectToMongo() (*mongo.Client, error) {
 		return nil, err
 	}
 
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
-
 	return client, nil
 }
 
