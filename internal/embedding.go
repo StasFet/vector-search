@@ -11,8 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type Vector []float32
-
 type EmbeddingResponse struct {
 	Object string `json:"object"`
 	Data   []struct {
@@ -73,7 +71,7 @@ func (e *EmbeddingResponse) GetVector() *[]float32 {
 	return &e.Data[0].Embedding
 }
 
-func (v Vector) ToBSONBinVector() bson.Binary {
-	vectorFloat := bson.NewVector(v)
+func BSONBinVector(v *[]float32) bson.Binary {
+	vectorFloat := bson.NewVector(*v)
 	return vectorFloat.Binary()
 }

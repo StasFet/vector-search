@@ -7,7 +7,6 @@ import (
 	i "mongo_vector_search/internal"
 
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func main() {
@@ -22,40 +21,35 @@ func main() {
 		log.Fatalf("error connecting to mongo: %v", err)
 	}
 
+	// disconnect at the end
 	defer func() {
 		if err = client.Disconnect(context.TODO()); err != nil {
 			log.Fatalf("error disconnecting from db: %v", err)
 		}
 	}()
 
+	// test ping
 	if ping := i.PingDB(client); !ping {
 		log.Fatalf("error: cannot ping db")
 	}
-
-	// TODO: check if this causes an error if the index is already made
-	err = client.Database("vector_db_1").CreateCollection(context.TODO(), "coll")
-	if err != nil {
-		log.Fatalf("Failed to create collection: %v", err)
-	}
-
 	collection := client.Database("vector_db_1").Collection("coll")
-	if err := i.CreateVectorSearchIndex(context.TODO(), collection); err != nil {
-		log.Fatalf("error creating vector search index: %v", err)
-	}
 
-	// check all the docs
-	cursor, err := collection.Find(context.TODO(), bson.D{})
+	allDocs, err := i.GetAllDocuments(context.TODO(), *collection)
 	if err != nil {
-		log.Fatalf("error finding documents: %v", err)
+		log.Fatalf("error getting all documents: %v", err)
 	}
 
-	var searchResults []i.VectorDocumentV1
-	if err = cursor.All(context.TODO(), &searchResults); err != nil {
-		log.Fatalf("error getting all documents from cursor: %v", err)
+	fmt.Println("All entries:")
+	for _, doc := range *allDocs {
+		fmt.Printf("\t %s\n", doc.Text)
 	}
 
-	for _, result := range searchResults {
-		res, _ := bson.MarshalExtJSON(result, false, false)
-		fmt.Println(string(res)[:80])
+	searchString := "Stool"
+
+	closest, err := i.VectorSearch(context.TODO(), searchString, *collection)
+	if err != nil {
+		log.Fatalf("error conducting vector search: %v", err)
 	}
+
+	fmt.Printf("Closest text to \"%s\": \n%s\n", searchString, closest)
 }
