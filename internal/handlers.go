@@ -21,9 +21,19 @@ func respondJSON(ctx *gin.Context, code int, message string) {
 	ctx.JSON(code, map[string]any{"message": message})
 }
 
+// extracts the database and collection names from params
+func ExtractDatabaseCollectionNames() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Set("databaseName", ctx.Param("database"))
+		ctx.Set("collectionName", ctx.Param("collection"))
+		ctx.Next()
+	}
+}
+
+// handles inserting a new entry
 func HandleInsert(client *mongo.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		vectorColl := client.Database(DatabaseName).Collection(CollectionName)
+		vectorColl := client.Database(ctx.GetString("databaseName")).Collection(ctx.GetString("collectionName"))
 
 		// extract the text from the request
 		reqContents := InsertRequestContents{}
@@ -54,7 +64,7 @@ func HandleInsert(client *mongo.Client) gin.HandlerFunc {
 // responds with an arbitrary amount of matches for a string
 func HandleSearch(client *mongo.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		vectorColl := client.Database(DatabaseName).Collection(CollectionName)
+		vectorColl := client.Database(ctx.GetString("databaseName")).Collection(ctx.GetString("collectionName"))
 
 		// extract text and amount
 		reqContents := SearchRequestContents{}
@@ -81,7 +91,7 @@ func HandleSearch(client *mongo.Client) gin.HandlerFunc {
 // responds with all the documents in the collection
 func HandleGetAll(client *mongo.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		vectorColl := client.Database(DatabaseName).Collection(CollectionName)
+		vectorColl := client.Database(ctx.GetString("databaseName")).Collection(ctx.GetString("collectionName"))
 
 		// fetch all the documents
 		documents, err := GetAllDocuments(context.TODO(), *vectorColl)
@@ -90,7 +100,7 @@ func HandleGetAll(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		// extract text 
+		// extract text
 		textOnly := []string{}
 		for _, document := range *documents {
 			textOnly = append(textOnly, document.Text)
@@ -98,7 +108,7 @@ func HandleGetAll(client *mongo.Client) gin.HandlerFunc {
 
 		// respond
 		ctx.JSON(http.StatusOK, map[string]any{
-			"status": "success",
+			"status":    "success",
 			"documents": textOnly,
 		})
 	}

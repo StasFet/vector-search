@@ -36,11 +36,12 @@ func main() {
 
 	// create API endpoints
 	ginClient := gin.Default()
+	ginClient.Use(i.ExtractDatabaseCollectionNames())
 
-	apiGroup := ginClient.Group("/api/")
+	apiGroup := ginClient.Group("/api/:database/:collection/")
 	{
 		apiGroup.GET("/vectorstore/", i.HandleGetAll(client))
-		apiGroup.POST("/vectorestore/", i.HandleInsert(client))
+		apiGroup.POST("/vectorstore/", i.HandleInsert(client))
 		apiGroup.POST("/vectorsearch/", i.HandleSearch(client))
 	}
 
