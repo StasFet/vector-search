@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"log"
 	"os"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -11,15 +10,12 @@ import (
 )
 
 const (
-	DatabaseName = "vector_db_1"
+	DatabaseName   = "vector_db_1"
 	CollectionName = "coll"
 )
 
 func ConnectToMongo() (*mongo.Client, error) {
-	var uri string
-	if uri = os.Getenv("MONGODB_URI"); uri == "" {
-		log.Fatalf("You must set your 'MONGODB_URI' environment variable")
-	}
+	uri := os.Getenv("MONGODB_URI")
 
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(uri).SetServerAPIOptions(serverAPI)

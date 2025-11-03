@@ -11,3 +11,12 @@ There is also an API endpoint for interfacing with this project. Here are the ro
 - `GET /api/:database/:collection/vectorstore/` - Returns all the elements in the DB (text only)
 
 Note: Each operation is done on the `:collection` collection of the `:database` database.
+
+
+## .env Setup
+The .env file has:
+- `MONGODB_URI` - You can find this easily if you are using Atlas Cloud. If you're hosting locally, you can check the Mongo docs on how to find the URI to your local db.
+- `OPENAI_API_KEY` - This is for the embedding model. If you make a project on OpenAI and buy some tokens, you will be able to make a key.
+- `PORT` (Optional) - Set a custom port if you want to use something besides 3000.
+
+The program will let you know in stdout if you have forgotten or mistyped any of these.

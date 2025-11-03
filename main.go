@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	i "mongo_vector_search/internal"
 	"os"
@@ -16,6 +17,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error loading env: %v", err)
 	}
+	checkEnvVariablesExist()
 
 	client, err := i.ConnectToMongo()
 	if err != nil {
@@ -50,4 +52,14 @@ func main() {
 		port = "3000"
 	}
 	ginClient.Run(":" + port)
+}
+
+func checkEnvVariablesExist() {
+	if os.Getenv("MONGODB_URI") == "" {
+		fmt.Println("Set your MONGODB_URI in containers/app.env")
+	}
+
+	if os.Getenv("OPENAI_API_KEY") == "" {
+		fmt.Println("Set your OPENAI_API_KEY in containers/app.env")
+	}
 }
