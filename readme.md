@@ -1,5 +1,5 @@
 # Vector Search
-This is a little project where I will experiment using MongoDB's Vector Search. 
+Vector/Semantic search is a type of search that can find matches for a query based on human meaning rather than just the text. This project is a simple semantic search engine API that allows for you to manage a simple semantic search database with functionality like inserting new items, querying for items, or viewing all items.
 
 For now, it has no purpose other than to experiment with MongoDB and vector search, but perhaps I will find an interesting use.
 
